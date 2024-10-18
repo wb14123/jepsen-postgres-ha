@@ -20,6 +20,14 @@ Then start Vagrant VMs:
 vagrant up
 ```
 
+### Shudown/Destroy VMs
+
+Use this command to shutdown VMs:
+
+```
+vagrant halt
+```
+
 If want to test with clean state, cleanup all the VMs and data:
 
 ```
