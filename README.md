@@ -14,6 +14,12 @@ First, create dir for disks:
 mkdir -p /data/vagrant/disks/
 ```
 
+Go to the cluster directory:
+
+```
+cd ./cluster
+```
+
 Then start Vagrant VMs:
 
 ```
