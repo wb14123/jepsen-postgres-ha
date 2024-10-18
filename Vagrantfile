@@ -13,7 +13,7 @@ def add_disk(config, disk_path)
 end
 
 
-distro = "hashicorp/bionic64"
+distro = "bento/debian-12.6"
 
 
 Vagrant.configure("2") do |config|
@@ -25,10 +25,7 @@ Vagrant.configure("2") do |config|
   end
 
   # disable firewall
-  config.vm.provision "shell", inline: "ufw disable"
-
-  # requirement for longhorn
-  config.vm.provision "shell", inline: "apt-get install open-iscsi"
+  # config.vm.provision "shell", inline: "ufw disable"
 
   config.vm.provider "virtualbox" do |v|
     v.memory = 2048
