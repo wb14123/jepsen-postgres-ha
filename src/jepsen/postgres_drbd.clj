@@ -1,6 +1,16 @@
-(ns jepsen.postgres-drbd)
+(ns jepsen.postgres-drbd
+  (:require [jepsen.cli :as cli]
+            [jepsen.tests :as tests]
+            )
+  )
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(defn postgres-test
+  [opts]
+  (merge tests/noop-test
+         {:pure-generators true}
+         opts))
+
+(defn -main
+  [& args]
+  (cli/run! (cli/single-test-cmd {:test-fn postgres-test})
+            args))
