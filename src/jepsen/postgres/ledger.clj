@@ -1,4 +1,4 @@
-(ns jepsen.stolon.ledger
+(ns jepsen.postgres.ledger
   "A test which aims to concretely demonstrate the impact of G2-item anomalies
   we found using the list-append test. We store a simulated bank ledger where
   each transaction is a row. Withdrawals require a positive balance across all
@@ -15,7 +15,7 @@
              [util :as util :refer [parse-long]]]
             [jepsen.checker.timeline :as timeline]
             [jepsen.tests.cycle.append :as append]
-            [jepsen.stolon [client :as c]]
+            [jepsen.postgres [client :as c]]
             [knossos.op :as op]
             [next.jdbc :as j]
             [next.jdbc.result-set :as rs]

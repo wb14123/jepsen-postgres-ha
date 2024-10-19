@@ -1,4 +1,4 @@
-(ns jepsen.stolon.append
+(ns jepsen.postgres.append
   "Test for transactional list append."
   (:require [clojure.tools.logging :refer [info warn]]
             [clojure [pprint :refer [pprint]]
@@ -11,7 +11,7 @@
              [util :as util :refer [parse-long]]]
             [jepsen.checker.timeline :as timeline]
             [jepsen.tests.cycle.append :as append]
-            [jepsen.stolon [client :as c]]
+            [jepsen.postgres [client :as c]]
             [next.jdbc :as j]
             [next.jdbc.result-set :as rs]
             [next.jdbc.sql.builder :as sqlb]

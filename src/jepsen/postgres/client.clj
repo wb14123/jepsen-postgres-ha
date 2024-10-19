@@ -1,4 +1,4 @@
-(ns jepsen.stolon.client
+(ns jepsen.postgres.client
   "Helper functions for interacting with PostgreSQL clients."
   (:require [clojure.tools.logging :refer [info warn]]
             [dom-top.core :refer [with-retry]]
