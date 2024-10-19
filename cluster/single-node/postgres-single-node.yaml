@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: postgres
+  serviceName: postgres
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: postgres
+        name: postgres
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_USER
+          value: admin
+        - name: POSTGRES_PASSWORD
+          value: testpassword
+        - name: PGDATA
+          value: /var/lib/postgresql/data
+        image: postgres:17.0
+        imagePullPolicy: IfNotPresent
+        name: postgres
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: postgres
+      restartPolicy: Always
+      volumes:
+      - name: postgres
+        persistentVolumeClaim:
+          claimName: postgres
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres
+spec:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 100Gi
+  local:
+    path: /vols/postgres-single-node
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - postgres-server-1
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: postgres
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: ""
+  volumeMode: Filesystem
+  volumeName: postgres
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: postgres
+  name: postgres-public
+spec:
+  ports:
+  - name: db
+    nodePort: 30020
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    app: postgres
+  type: NodePort
+apiVersion: v1
+
+
