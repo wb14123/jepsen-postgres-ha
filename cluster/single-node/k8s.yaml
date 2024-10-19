@@ -48,7 +48,7 @@ spec:
   capacity:
     storage: 100Gi
   local:
-    path: /vols/postgres-single-node
+    path: /psql-data
   nodeAffinity:
     required:
       nodeSelectorTerms:

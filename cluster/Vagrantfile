@@ -27,10 +27,6 @@ Vagrant.configure("2") do |config|
   # disable firewall
   # config.vm.provision "shell", inline: "ufw disable"
 
-  # prepare single node dir and k8s file
-  config.vm.provision "shell", inline: "mkdir -p /vols/postgres-single-node"
-  config.vm.protected "file", source: "./single-node", destination: "$HOME/single-node"
-
   config.vm.provider "virtualbox" do |v|
     v.memory = 2048
   end

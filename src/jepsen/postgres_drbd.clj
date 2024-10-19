@@ -1,13 +1,22 @@
 (ns jepsen.postgres-drbd
-  (:require [jepsen.cli :as cli]
-            [jepsen.tests :as tests]
+  (:require [jepsen [cli :as cli]
+             [tests :as tests]
+             [postgres-db :as pdb]
+             ]
+            [jepsen.os.debian :as debian]
             )
   )
 
 (defn postgres-test
   [opts]
   (merge tests/noop-test
-         {:pure-generators true}
+         opts
+         {
+          :name "postgres"
+          :os debian/os
+          :db (pdb/k8s-db "single-node")
+          :pure-generators true
+          }
          opts))
 
 (defn -main
