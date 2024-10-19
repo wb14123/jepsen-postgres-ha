@@ -1,0 +1,4 @@
+node-ip: "192.168.56.5"
+token: unsecureagenttoken
+server: https://192.168.56.2:6443
+flannel-iface: eth1
