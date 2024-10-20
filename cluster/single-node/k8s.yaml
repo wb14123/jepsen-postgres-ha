@@ -18,7 +18,7 @@ spec:
       containers:
       - env:
         - name: POSTGRES_USER
-          value: admin
+          value: postgres
         - name: POSTGRES_PASSWORD
           value: testpassword
         - name: PGDATA

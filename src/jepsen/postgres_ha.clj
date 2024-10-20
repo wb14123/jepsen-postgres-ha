@@ -62,7 +62,7 @@
   [opts]
   (let [workload-name (:workload opts)
         workload      ((workloads workload-name) opts)
-        db (pdb/k8s-db "single-node")
+        db (pdb/k8s-db (:cluster opts))
         nemesis       (nemesis/nemesis-package
                         {:db        db
                          :nodes     (:nodes opts)
@@ -177,7 +177,7 @@
     :parse-fn parse-long]
 
    [nil "--postgres-user NAME" "What username should we use to connect to postgres? Only use this with --existing-postgres, or you'll probably confuse the Stolon setup."
-    :default "admin"]
+    :default "postgres"]
 
    [nil "--prepare-threshold INT" "Passes a prepareThreshold option to the JDBC spec."
     :parse-fn parse-long]
@@ -189,6 +189,9 @@
 
    ["-v" "--version STRING" "What version of Stolon should we test?"
     :default "0.16.0"]
+
+   [nil "--cluster" "Which postgres cluster to test."
+    :parse-fn read-string]
 
    ["-w" "--workload NAME" "What workload should we run?"
     :default :append

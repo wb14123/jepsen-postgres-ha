@@ -33,7 +33,7 @@ spec:
       serviceAccountName: patronidemo
       containers:
       - name: *cluster_name
-        image: patroni  # docker build -t patroni .
+        image: wb14123/patroni:v4.0.3-969d7ec4 # my own built image from source
         imagePullPolicy: IfNotPresent
         readinessProbe:
           httpGet:
@@ -71,17 +71,11 @@ spec:
         - name: PATRONI_SUPERUSER_USERNAME
           value: postgres
         - name: PATRONI_SUPERUSER_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: *cluster_name
-              key: superuser-password
+          value: testpassword
         - name: PATRONI_REPLICATION_USERNAME
           value: standby
         - name: PATRONI_REPLICATION_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: *cluster_name
-              key: replication-password
+          value: tsetpassword
         - name: PATRONI_SCOPE
           value: *cluster_name
         - name: PATRONI_NAME
@@ -139,6 +133,26 @@ spec:
   - port: 5432
     targetPort: 5432
 
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: patronidemo-public
+  labels:
+    application: patroni
+    cluster-name: &cluster_name patronidemo
+spec:
+  type: NodePort
+  ports:
+  - port: 5432
+    targetPort: 5432
+    nodePort: 30020
+  selector:
+    application: patroni
+    cluster-name: *cluster_name
+    role: primary
+
 ---
 apiVersion: v1
 kind: Service
@@ -157,19 +171,6 @@ spec:
   ports:
   - port: 5432
     targetPort: 5432
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: &cluster_name patronidemo
-  labels:
-    application: patroni
-    cluster-name: *cluster_name
-type: Opaque
-data:
-  superuser-password: emFsYW5kbw==
-  replication-password: cmVwLXBhc3M=
 
 ---
 apiVersion: v1
