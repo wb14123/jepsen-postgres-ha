@@ -36,22 +36,31 @@
   "Just runt he command on one node"
   [ip & commands]
   (if (= ip "192.168.56.2")
-    (c/su (c/exec commands))))
+    (do
+      (info "Run cmd" commands)
+      (c/su (c/exec commands)))
+    (info "Ignore cmd since it should just run on one node ...")
+    ))
 
 (defn k8s-db
   [k8s-dir]
   (reify db/DB
 
     (setup! [_ test node]
+      (info "Setup node" node)
       (c/upload (str "./cluster/" k8s-dir "/k8s.yaml") "/home/vagrant/k8s.yaml")
       (c/su (c/exec "mkdir" "-p" "/psql-data"))
       (run-on-one-node node "kubectl" "create" "-f" "/home/vagrant/k8s.yaml")
-      (run-on-one-node node "kubectl" "wait" "--for=condition=Ready" "pods" "--all"))
+      (Thread/sleep 5000)
+      (run-on-one-node node "kubectl" "wait" "--for=condition=Ready" "pods" "--all" "--timeout=600s")
+      (Thread/sleep 10000))
 
     (teardown! [_ test node]
+      (info "Teardown node" node)
       (c/upload (str "./cluster/" k8s-dir "/k8s.yaml") "/home/vagrant/k8s.yaml")
       (run-on-one-node node "kubectl" "delete" "--ignore-not-found=true" "-f" "/home/vagrant/k8s.yaml")
-      (run-on-one-node node "kubectl" "wait" "--for=delete" "pods" "--all")
+      (Thread/sleep 5000)
+      (run-on-one-node node "kubectl" "wait" "--for=delete" "pods" "--all" "--timeout=600s")
       (c/su (c/exec "rm" "-rf" "/psql-data")))
 
     db/Kill

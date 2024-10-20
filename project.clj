@@ -6,6 +6,8 @@
   :dependencies [[org.clojure/clojure "1.11.1"]
                  [jepsen "0.3.5"]
                  [org.postgresql/postgresql "42.7.2"]
+                 [seancorfield/next.jdbc "1.2.659"]
+                 [clj-wallhack "1.0.1"]
                  ]
   :main jepsen.postgres-drbd
   :repl-options {:init-ns jepsen.postgres-drbd})
