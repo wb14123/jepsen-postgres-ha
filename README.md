@@ -1,6 +1,7 @@
-# jepsen-postgres-drbd
+# jepsen-postgres-ha
 
-Test postgres setup with Jepsen
+Test different postgres HA setup with Jepsen.
+
 
 ## Usage
 
