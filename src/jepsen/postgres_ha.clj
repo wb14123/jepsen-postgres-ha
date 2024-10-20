@@ -1,4 +1,4 @@
-(ns jepsen.postgres-drbd
+(ns jepsen.postgres-ha
   (:require
     [clojure.tools.logging :refer [info warn]]
     [clojure [edn :as edn]

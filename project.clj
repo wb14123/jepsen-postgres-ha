@@ -1,4 +1,4 @@
-(defproject jepsen.postgres-drbd "0.1.0-SNAPSHOT"
+(defproject jepsen.postgres-ha "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -9,5 +9,5 @@
                  [seancorfield/next.jdbc "1.2.659"]
                  [clj-wallhack "1.0.1"]
                  ]
-  :main jepsen.postgres-drbd
-  :repl-options {:init-ns jepsen.postgres-drbd})
+  :main jepsen.postgres-ha
+  :repl-options {:init-ns jepsen.postgres-ha})
