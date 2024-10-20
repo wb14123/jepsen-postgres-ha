@@ -42,6 +42,17 @@
     (info "Ignore cmd since it should just run on one node ...")
     ))
 
+(defn vagrant-env
+  []
+  (let [env-vars (into {} (System/getenv))
+        vagrant-dir (str (System/getProperty "user.dir") "/cluster")
+        vagrant-file (str vagrant-dir "/Vagrantfile")
+        updated-env-vars (assoc env-vars
+                           "VAGRANT_VAGRANTFILE" vagrant-file
+                           "VAGRANT_CWD" vagrant-dir
+                           )]
+    updated-env-vars))
+
 (defn k8s-db
   [k8s-dir]
   (reify db/DB
@@ -63,10 +74,15 @@
       (run-on-one-node node "kubectl" "wait" "--for=delete" "pods" "--all" "--timeout=600s")
       (c/su (c/exec "rm" "-rf" "/psql-data")))
 
+    db/Primary
+    (setup-primary! [db test node])
+    (primaries [db test]
+      (:nodes test))
+
     db/Kill
 
     (start! [_ test node]
-      (unwrap-result (sh "vagrant" "up" (node-ip-to-name node)) ::vagrant-start-failed))
+      (unwrap-result ::vagrant-start-failed (sh "vagrant" "up" (node-ip-to-name node) :env (vagrant-env))))
 
     (kill! [_ test node]
-      (unwrap-result (sh "vagrant" "halt" "-f" (node-ip-to-name node)) ::vagrant-halt-failed))))
+      (unwrap-result ::vagrant-halt-failed (sh "vagrant" "halt" "-f" (node-ip-to-name node) :env (vagrant-env))))))

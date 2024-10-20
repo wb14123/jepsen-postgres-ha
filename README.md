@@ -46,6 +46,11 @@ vagrant destroy -f
 Once the VMs are started, Jepsen tests can be run with
 
 ```
-lein run test --nodes-file ./nodes --username vagrant -w append --concurrency 50 --isolation serializable --nemesis none  --time-limit 120   -r 200 --max-writes-per-key 16
+lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrency 50 --isolation serializable --nemesis none  --time-limit 120   -r 200 --max-writes-per-key 16
 ```
 
+With nemesis:
+
+```
+lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrency 50 --isolation serializable --nemesis all  --time-limit 60   -r 200 --max-writes-per-key 16
+```
