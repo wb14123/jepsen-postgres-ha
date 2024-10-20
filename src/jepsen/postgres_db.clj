@@ -69,10 +69,13 @@
     (teardown! [_ test node]
       (info "Teardown node" node)
       (c/upload (str "./cluster/" k8s-dir "/k8s.yaml") "/home/vagrant/k8s.yaml")
-      (run-on-one-node node "kubectl" "delete" "--ignore-not-found=true" "-f" "/home/vagrant/k8s.yaml")
-      (Thread/sleep 5000)
+      ; do not wait since pv will not be deleted before pvc
+      (run-on-one-node node "kubectl" "delete" "--ignore-not-found=true" "--wait=false" "-f" "/home/vagrant/k8s.yaml")
       ; pvc created by stateful set template is not auto deleted above
       (run-on-one-node node "kubectl" "delete" "pvc" "--all")
+      ; delete again after pvc is deleted
+      (run-on-one-node node "kubectl" "delete" "--ignore-not-found=true" "-f" "/home/vagrant/k8s.yaml")
+      (Thread/sleep 5000)
       (run-on-one-node node "kubectl" "wait" "--for=delete" "pods" "--all" "--timeout=600s")
       (c/su (c/exec "rm" "-rf" "/psql-data")))
 
