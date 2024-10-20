@@ -190,8 +190,12 @@
    ["-v" "--version STRING" "What version of Stolon should we test?"
     :default "0.16.0"]
 
-   [nil "--cluster" "Which postgres cluster to test."
-    :parse-fn read-string]
+   [nil "--cluster NAME" "Which postgres cluster to test."
+    :parse-fn str
+    :validate [#{"single-node" "patroni"}
+               "Should be one of single-node, or patroni"
+               ]
+    ]
 
    ["-w" "--workload NAME" "What workload should we run?"
     :default :append

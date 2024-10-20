@@ -71,6 +71,8 @@
       (c/upload (str "./cluster/" k8s-dir "/k8s.yaml") "/home/vagrant/k8s.yaml")
       (run-on-one-node node "kubectl" "delete" "--ignore-not-found=true" "-f" "/home/vagrant/k8s.yaml")
       (Thread/sleep 5000)
+      ; pvc created by stateful set template is not auto deleted above
+      (run-on-one-node node "kubectl" "delete" "pvc" "--all")
       (run-on-one-node node "kubectl" "wait" "--for=delete" "pods" "--all" "--timeout=600s")
       (c/su (c/exec "rm" "-rf" "/psql-data")))
 
