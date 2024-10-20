@@ -10,6 +10,14 @@ spec:
   clusterIP: None
 
 ---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: Immediate
+
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -31,6 +39,18 @@ spec:
         cluster-name: *cluster_name
     spec:
       serviceAccountName: patronidemo
+      initContainers:
+      - name: init-permission
+        image: busybox
+        command:
+        - chown
+        - "-R"
+        - "999:999"
+        - "/home/postgres"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: pgdata
+          mountPath: "/home/postgres"
       containers:
       - name: *cluster_name
         image: wb14123/patroni:v4.0.3-969d7ec4 # my own built image from source
@@ -93,21 +113,19 @@ spec:
       terminationGracePeriodSeconds: 0
       volumes:
       - name: pgdata
-        emptyDir: {}
-#  volumeClaimTemplates:
-#  - metadata:
-#      labels:
-#        application: spilo
-#        spilo-cluster: *cluster_name
-#      annotations:
-#        volume.alpha.kubernetes.io/storage-class: anything
-#      name: pgdata
-#    spec:
-#      accessModes:
-#      - ReadWriteOnce
-#      resources:
-#        requests:
-#          storage: 5Gi
+        persistentVolumeClaim:
+          claimName: pgdata
+  volumeClaimTemplates:
+  - metadata:
+      name: pgdata
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: 100Gi
+      storageClassName: "local-storage"
+      volumeMode: Filesystem
 
 ---
 apiVersion: v1
@@ -280,3 +298,77 @@ subjects:
 # The namespace must be specified explicitly.
 # If deploying to the different namespace you have to change it.
   namespace: default
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: patroni-pv-1
+spec:
+  storageClassName: local-storage
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 100Gi
+  local:
+    path: /psql-data
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - postgres-server-1
+
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: patroni-pv-2
+spec:
+  storageClassName: local-storage
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 100Gi
+  local:
+    path: /psql-data
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - postgres-server-2
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: patroni-pv-3
+spec:
+  storageClassName: local-storage
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 100Gi
+  local:
+    path: /psql-data
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - postgres-server-3
+
