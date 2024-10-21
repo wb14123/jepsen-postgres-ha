@@ -66,5 +66,5 @@ lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrenc
 With nemesis:
 
 ```
-lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrency 50 --isolation serializable --nemesis all  --time-limit 60   -r 200 --max-writes-per-key 16
+lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrency 50 --isolation serializable --nemesis all  --time-limit 180   -r 200 --max-writes-per-key 16 --nemesis-interval 30 --cluster single-node
 ```
