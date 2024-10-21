@@ -62,7 +62,8 @@
   [opts]
   (let [workload-name (:workload opts)
         workload      ((workloads workload-name) opts)
-        db (pdb/k8s-db (:cluster opts))
+        cluster (:cluster opts)
+        db (pdb/k8s-db cluster)
         nemesis       (nemesis/nemesis-package
                         {:db        db
                          :nodes     (:nodes opts)
@@ -74,7 +75,7 @@
     (merge tests/noop-test
            opts
            {
-            :name (str "postgres" (name workload-name)
+            :name (str "postgres " (name cluster) " " (name workload-name)
                        " " (short-isolation (:isolation opts)) " ("
                        (short-isolation (:expected-consistency-model opts)) ")"
                        " " (str/join "," (map name (:nemesis opts))))

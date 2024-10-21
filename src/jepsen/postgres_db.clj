@@ -86,6 +86,7 @@
       (run-on-one-node node "kubectl" "delete" "--ignore-not-found=true" "-f" "/home/vagrant/k8s.yaml")
       (Thread/sleep 5000)
       (run-on-one-node node "kubectl" "wait" "--for=delete" "pods" "--all" "--timeout=600s")
+      (Thread/sleep 5000)
       (c/su (c/exec "rm" "-rf" "/psql-data")))
 
     db/Primary
