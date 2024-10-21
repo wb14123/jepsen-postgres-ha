@@ -20,6 +20,7 @@
                :port      (:postgres-port     test)
                :user      (:postgres-user     test)
                :password  (:postgres-password test)
+               :socketTimeout 10
                :sslmode   (:postgres-sslmode test)}
         spec  (if-let [pt (:prepare-threshold test)]
                 (assoc spec :prepareThreshold pt)
