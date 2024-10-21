@@ -53,6 +53,12 @@
                            )]
     updated-env-vars))
 
+(defn start-node
+  [node]
+  (info "Vagrant up node start " node)
+  (unwrap-result ::vagrant-start-failed (sh "vagrant" "up" (node-ip-to-name node) :env (vagrant-env)))
+  (info "Vagrant up node finished " node))
+
 (defn k8s-db
   [k8s-dir]
   (reify db/DB
@@ -68,6 +74,9 @@
 
     (teardown! [_ test node]
       (info "Teardown node" node)
+      ; try to start the node in case nemesis killed it
+      (start-node node)
+      (Thread/sleep 30000) ; sleep 30s for k8s to recover
       (c/upload (str "./cluster/" k8s-dir "/k8s.yaml") "/home/vagrant/k8s.yaml")
       ; do not wait since pv will not be deleted before pvc
       (run-on-one-node node "kubectl" "delete" "--ignore-not-found=true" "--wait=false" "-f" "/home/vagrant/k8s.yaml")
@@ -87,7 +96,9 @@
     db/Kill
 
     (start! [_ test node]
-      (unwrap-result ::vagrant-start-failed (sh "vagrant" "up" (node-ip-to-name node) :env (vagrant-env))))
+      (start-node node))
 
     (kill! [_ test node]
-      (unwrap-result ::vagrant-halt-failed (sh "vagrant" "halt" "-f" (node-ip-to-name node) :env (vagrant-env))))))
+      (info "kill db on node " node)
+      (unwrap-result ::vagrant-halt-failed (sh "vagrant" "halt" "-f" (node-ip-to-name node) :env (vagrant-env)))
+      (info "killed db on node " node))))
