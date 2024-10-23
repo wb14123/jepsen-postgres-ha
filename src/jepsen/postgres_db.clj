@@ -1,6 +1,7 @@
 
 (ns jepsen.postgres-db
-  (:require [clojure.tools.logging :refer :all]
+  (:require [clojure.string :as str]
+            [clojure.tools.logging :refer :all]
             [clojure.java.shell :refer [sh]]
             [slingshot.slingshot :refer [throw+]]
             [jepsen [db :as db]
@@ -15,13 +16,15 @@
   [exc-type {:keys [exit] :as result}]
   (if (zero? exit)
     result
-    (throw+
-      (assoc result :type exc-type)
-      nil ; cause
-      "Command exited with non-zero status %d:\nSTDOUT:\n%s\n\nSTDERR:\n%s"
-      exit
-      (:out result)
-      (:err result))))
+    (do
+      (warn "Cmd failed" result)
+      (throw+
+        (assoc result :type exc-type)
+        nil ; cause
+        "Command exited with non-zero status %d:\nSTDOUT:\n%s\n\nSTDERR:\n%s"
+        exit
+        (:out result)
+        (:err result)))))
 
 
 (defn node-ip-to-name
@@ -59,6 +62,34 @@
   (unwrap-result ::vagrant-start-failed (sh "vagrant" "up" (node-ip-to-name node) :env (vagrant-env)))
   (info "Vagrant up node finished " node))
 
+(defn kill-node
+  [node]
+  (info "kill db on node " node)
+  (unwrap-result ::vagrant-halt-failed (sh "vagrant" "halt" "-f" (node-ip-to-name node) :env (vagrant-env)))
+  (info "killed db on node " node))
+
+(defn get-sub-processes
+  [pid]
+  (try
+    (str/split-lines (c/exec* (str "pstree -p " pid " | grep -o '([0-9]\\+)' | grep -o '[0-9]\\+'")))
+    (catch Exception e (warn "Error find subprocess" e) [])))
+
+
+
+(defn kill-k3s-all
+  "force kill k3s server and all containers including all subprocesses"
+  []
+  (c/su
+    (let [pids (str/split-lines (c/exec "pgrep" "-f" "containerd-shim-runc-v2"))
+          all-pids (mapcat get-sub-processes pids)]
+      (c/exec "systemctl" "kill" "--signal=9" "k3s")
+      (c/exec "systemctl" "stop" "k3s")
+      (apply c/exec "kill" "-9" all-pids))))
+
+(defn start-k3s
+  []
+  (c/su (c/exec "systemctl" "start" "--no-block" "k3s")))
+
 (defn k8s-db
   [k8s-dir]
   (reify db/DB
@@ -74,9 +105,6 @@
 
     (teardown! [_ test node]
       (info "Teardown node" node)
-      ; try to start the node in case nemesis killed it
-      (start-node node)
-      (Thread/sleep 30000) ; sleep 30s for k8s to recover
       (c/upload (str "./cluster/" k8s-dir "/k8s.yaml") "/home/vagrant/k8s.yaml")
       ; do not wait since pv will not be deleted before pvc
       (run-on-one-node node "kubectl" "delete" "--ignore-not-found=true" "--wait=false" "-f" "/home/vagrant/k8s.yaml")
@@ -97,9 +125,7 @@
     db/Kill
 
     (start! [_ test node]
-      (start-node node))
+      (start-k3s))
 
     (kill! [_ test node]
-      (info "kill db on node " node)
-      (unwrap-result ::vagrant-halt-failed (sh "vagrant" "halt" "-f" (node-ip-to-name node) :env (vagrant-env)))
-      (info "killed db on node " node))))
+      (kill-k3s-all))))

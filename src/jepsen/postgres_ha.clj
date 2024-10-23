@@ -9,6 +9,7 @@
      [checker :as checker]
      [generator :as gen]
      [postgres-db :as pdb]]
+    [jepsen.control :as c]
     [jepsen.os.debian :as debian]
     [jepsen.postgres [append :as append]
      [ledger :as ledger]
@@ -91,7 +92,8 @@
                         :workload   (:checker workload)})
             :client    (:client workload)
             :nemesis   (:nemesis nemesis)
-            ; :leave-db-running? true
+            ; :net (jepsen.k8s.net/iptables)
+            :leave-db-running? true
             :generator (gen/phases
                          (->> (:generator workload)
                               (gen/stagger (/ (:rate opts)))
@@ -211,15 +213,22 @@
   (update-in parsed [:options :expected-consistency-model]
              #(or % (get-in parsed [:options :isolation]))))
 
-
 (defn -main
   [& args]
-  (cli/run! (merge (cli/single-test-cmd {:test-fn postgres-test
+  (cli/run! (merge (cli/single-test-cmd {:test-fn  postgres-test
                                          :opt-spec cli-opts
-                                         :opt-fn opt-fn
+                                         :opt-fn   opt-fn
                                          })
                    (cli/test-all-cmd {:tests-fn (partial all-tests postgres-test)
                                       :opt-spec cli-opts
                                       :opt-fn   opt-fn})
                    (cli/serve-cmd))
             args))
+
+
+(comment
+  (defn -main
+    [& args]
+    (c/with-ssh {:username "vagrant"}
+                (c/on "192.168.56.2" (pdb/kill-k3s-all))))
+  )
