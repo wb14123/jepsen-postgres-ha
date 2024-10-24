@@ -54,14 +54,16 @@
     ))
 
 (defn try-one-node
-  "Try to run command only on one node. If failed, try it on other nodes"
+  "Try to run command only on one node. If failed, try it on other nodes."
   [nodes cmd]
-  (let [node (first nodes)]
-    (try
-      (c/on node (c/exec* cmd))
-      (catch Exception e ;; If it throws an exception, catch it
-        (warn "fail to execute cmd on node" cmd node)
-        (try-one-node (rest nodes) cmd)))))
+  (if (empty? nodes)
+    nil
+    (let [node (first nodes)]
+      (try
+        (c/on node (c/su (c/exec* cmd)))
+        (catch Exception e ;; If it throws an exception, catch it
+          (warn "fail to execute cmd on node" cmd node e)
+          (try-one-node (rest nodes) cmd))))))
 
 (defn vagrant-env
   []
@@ -138,8 +140,10 @@
     db/Primary
     (setup-primary! [db test node])
     (primaries [db test]
-      (node-name-to-ip
-        (try-one-node (:nodes test) "kubectl get pods  -l role=primary -o jsonpath=\"{.items[*].spec.nodeName}\"")))
+      (let [n (try-one-node (:nodes test) "kubectl get pods  -l role=primary -o jsonpath=\"{.items[*].spec.nodeName}\"")]
+        (if (nil? n)
+        []
+        [(node-name-to-ip n)])))
 
     db/Kill
 
