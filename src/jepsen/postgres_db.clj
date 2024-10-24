@@ -35,6 +35,14 @@
     "192.168.56.4" "postgres-server-3"
     ))
 
+(defn node-name-to-ip
+  [name]
+  (case name
+    "postgres-server-1" "192.168.56.2"
+    "postgres-server-2" "192.168.56.3"
+    "postgres-server-3" "192.168.56.4"
+    ))
+
 (defn run-on-one-node
   "Just runt he command on one node"
   [ip & commands]
@@ -44,6 +52,16 @@
       (c/su (c/exec commands)))
     (info "Ignore cmd since it should just run on one node ...")
     ))
+
+(defn try-one-node
+  "Try to run command only on one node. If failed, try it on other nodes"
+  [nodes cmd]
+  (let [node (first nodes)]
+    (try
+      (c/on node (c/exec* cmd))
+      (catch Exception e ;; If it throws an exception, catch it
+        (warn "fail to execute cmd on node" cmd node)
+        (try-one-node (rest nodes) cmd)))))
 
 (defn vagrant-env
   []
@@ -120,7 +138,8 @@
     db/Primary
     (setup-primary! [db test node])
     (primaries [db test]
-      (:nodes test))
+      (node-name-to-ip
+        (try-one-node (:nodes test) "kubectl get pods  -l role=primary -o jsonpath=\"{.items[*].spec.nodeName}\"")))
 
     db/Kill
 

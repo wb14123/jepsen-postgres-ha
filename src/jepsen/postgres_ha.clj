@@ -11,6 +11,7 @@
      [postgres-db :as pdb]]
     [jepsen.control :as c]
     [jepsen.os.debian :as debian]
+    [jepsen.k8s.net :as k8s-net]
     [jepsen.postgres [append :as append]
      [ledger :as ledger]
      [nemesis :as nemesis]]
@@ -92,7 +93,7 @@
                         :workload   (:checker workload)})
             :client    (:client workload)
             :nemesis   (:nemesis nemesis)
-            ; :net (jepsen.k8s.net/iptables)
+            :net k8s-net/iptables
             :leave-db-running? true
             :generator (gen/phases
                          (->> (:generator workload)
@@ -108,14 +109,14 @@
   [cli nemeses workloads]
   (for [n nemeses, w workloads, _ (range (:test-count cli))]
     (assoc cli
-      :nemesis   n
-      :workload  w)))
+      :nemesis n
+      :workload w)))
 
 
 (defn all-tests
   "Turns CLI options into a sequence of tests."
   [test-fn cli]
-  (let [nemeses   (if-let [n (:nemesis cli)] [n]  all-nemeses)
+  (let [nemeses (if-let [n (:nemesis cli)] [n] all-nemeses)
         workloads (if-let [w (:workload cli)] [w]
                                               (if (:only-workloads-expected-to-pass cli)
                                                 workloads-expected-to-pass
