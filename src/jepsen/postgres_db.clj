@@ -143,7 +143,7 @@
       (let [n (try-one-node (:nodes test) "kubectl get pods  -l role=primary -o jsonpath=\"{.items[*].spec.nodeName}\"")]
         (if (nil? n)
         []
-        [(node-name-to-ip n)])))
+        (map node-name-to-ip (str/split n " ")))))
 
     db/Kill
 
