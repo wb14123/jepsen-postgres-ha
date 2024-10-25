@@ -68,3 +68,13 @@ With nemesis:
 ```
 lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrency 50 --isolation serializable --nemesis all  --time-limit 180   -r 200 --max-writes-per-key 16 --nemesis-interval 30 --cluster single-node
 ```
+
+### Test Result
+
+#### patroni
+
+Failed with `kill` and `partition` nemesis combained:
+
+```
+lein run test --nodes-file ./nodes --username vagrant -w append --concurrency 50 --isolation serializable --nemesis partition,kill  --time-limit 1200 -r 200 --max-writes-per-key 16 --nemesis-interval 120 --cluster patroni
+```
