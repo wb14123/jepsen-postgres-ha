@@ -70,9 +70,10 @@
                         {:db        db
                          :nodes     (:nodes opts)
                          :faults    (:nemesis opts)
-                         :partition {:targets [:primaries]}
+                         :partition {:targets [:primaries :one]}
                          :pause     {:targets [nil :one :primaries :majority :all]}
-                         :kill      {:targets [nil :one :primaries :majority :all]}
+                         ; :kill      {:targets [nil :one :primaries :majority :all]}
+                         :kill      {:targets [:primaries]}
                          :interval  (:nemesis-interval opts)})]
     (merge tests/noop-test
            opts
