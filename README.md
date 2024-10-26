@@ -79,6 +79,8 @@ lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrenc
 
 #### Patroni should only has most 1 primary at any given time: failed
 
+This test runs for 10 mins (`--time-limit 600`). Should be able to find failures faster by tunning `--nemesis-interval` and `--time-limit`.
+
 ```
 lein run test --nodes-file ./nodes --username vagrant -w check-primary --concurrency 1 --isolation serializable --nemesis partition,kill  --time-limit 600 -r 1 --max-writes-per-key 16 --nemesis-interval 120 --cluster patroni
 ```
