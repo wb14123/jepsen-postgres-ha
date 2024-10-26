@@ -77,7 +77,9 @@ lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrenc
 
 ### Test Result
 
-#### Patroni should only has most 1 primary at any given time: failed
+#### Patroni check primary failed
+
+Patroni should at most 1 primary.
 
 This test runs for 10 mins (`--time-limit 600`). Should be able to find failures faster by tunning `--nemesis-interval` and `--time-limit`.
 
