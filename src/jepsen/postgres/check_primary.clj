@@ -12,6 +12,7 @@
              [generator :as gen]
              [util :as util :refer [parse-long]]]
             [jepsen.checker.timeline :as timeline]
+            [jepsen.postgres-db :as pdb]
             [jepsen.tests.cycle.append :as append]
             [jepsen.postgres [client :as c]]
             [next.jdbc :as j]
@@ -30,10 +31,11 @@
   (invoke! [_ test op]
     (let [test-db (:db test)
           primaries (db/primaries test-db test)
+          debug-info (pdb/try-one-node (:nodes test) "kubectl get pods -o wide -L role")
           ]
       (if (> (count primaries) 1)
-        (assoc op :type :fail, :value primaries)
-        (assoc op :type :ok, :value primaries))))
+        (assoc op :type :fail, :value {:primaries primaries, :debug-info debug-info})
+        (assoc op :type :ok, :value {:primaries primaries, :debug-info debug-info}))))
 
   (teardown! [this test])
 

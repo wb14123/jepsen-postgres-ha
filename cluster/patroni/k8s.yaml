@@ -306,6 +306,9 @@ metadata:
   name: patroni-pv-1
 spec:
   storageClassName: local-storage
+  claimRef:
+    namespace: default
+    name: pgdata-patronidemo-0
   accessModes:
   - ReadWriteMany
   capacity:
@@ -331,6 +334,9 @@ metadata:
   name: patroni-pv-2
 spec:
   storageClassName: local-storage
+  claimRef:
+    namespace: default
+    name: pgdata-patronidemo-1
   accessModes:
   - ReadWriteMany
   capacity:
@@ -355,6 +361,9 @@ metadata:
   name: patroni-pv-3
 spec:
   storageClassName: local-storage
+  claimRef:
+    namespace: default
+    name: pgdata-patronidemo-2
   accessModes:
   - ReadWriteMany
   capacity:
