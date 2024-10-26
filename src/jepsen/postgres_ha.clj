@@ -14,6 +14,7 @@
     [jepsen.k8s.net :as k8s-net]
     [jepsen.postgres [append :as append]
      [ledger :as ledger]
+     [check-primary :as check-primary]
      [nemesis :as nemesis]]
     )
   )
@@ -30,6 +31,7 @@
 (def workloads
   {:append      append/workload
    :ledger      ledger/workload
+   :check-primary check-primary/workload
    :none        (fn [_] tests/noop-test)})
 
 (def all-workloads
@@ -70,10 +72,10 @@
                         {:db        db
                          :nodes     (:nodes opts)
                          :faults    (:nemesis opts)
-                         :partition {:targets [:primaries :one]}
+                         :partition {:targets [nil :primaries :one]}
                          :pause     {:targets [nil :one :primaries :majority :all]}
                          ; :kill      {:targets [nil :one :primaries :majority :all]}
-                         :kill      {:targets [:primaries]}
+                         :kill      {:targets [nil :primaries]}
                          :interval  (:nemesis-interval opts)})]
     (merge tests/noop-test
            opts

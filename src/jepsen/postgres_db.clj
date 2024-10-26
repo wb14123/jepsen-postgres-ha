@@ -62,7 +62,7 @@
       (try
         (c/on node (c/su (c/exec* cmd)))
         (catch Exception e ;; If it throws an exception, catch it
-          (warn "fail to execute cmd on node" cmd node e)
+          ; (warn "fail to execute cmd on node" cmd node e)
           (try-one-node (rest nodes) cmd))))))
 
 (defn vagrant-env
