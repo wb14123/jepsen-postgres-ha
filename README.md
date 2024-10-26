@@ -18,6 +18,12 @@ The cluster can be selected with cli option `--cluster`.
 
 ## Usage
 
+### Requirements
+
+* JDK >= 21
+* [Leiningen](https://leiningen.org/)
+* [Vagrant](https://www.vagrantup.com/) and Virtual Box.
+
 ### Prepare VMs
 
 VMs are created by Vagrant.
@@ -71,7 +77,13 @@ lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrenc
 
 ### Test Result
 
-#### patroni
+#### Patroni should only has most 1 primary at any given time: failed
+
+```
+lein run test --nodes-file ./nodes --username vagrant -w check-primary --concurrency 1 --isolation serializable --nemesis partition,kill  --time-limit 600 -r 1 --max-writes-per-key 16 --nemesis-interval 120 --cluster patroni
+```
+
+#### Patroni serializable failed
 
 Failed with `kill` and `partition` nemesis combained:
 
