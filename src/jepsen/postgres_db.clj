@@ -140,7 +140,7 @@
     db/Primary
     (setup-primary! [db test node])
     (primaries [db test]
-      (let [n (try-one-node (:nodes test) "kubectl get pods  -l role=primary -o jsonpath=\"{.items[*].spec.nodeName}\"")]
+      (let [n (try-one-node (:nodes test) "kubectl get endpoints patronidemo -o jsonpath=\"{.subsets[*].addresses[*].nodeName}\"")]
         (if (nil? n)
         []
         (map node-name-to-ip (str/split n #" ")))))
