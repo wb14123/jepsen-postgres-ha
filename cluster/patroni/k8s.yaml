@@ -53,7 +53,7 @@ spec:
           mountPath: "/home/postgres"
       containers:
       - name: *cluster_name
-        image: wb14123/patroni:v4.0.3-969d7ec4 # my own built image from source
+        image: wb14123/patroni:v4.0.3-test-2 # build from https://github.com/wb14123/patroni/commit/5ea853ef43770bc0452055753124b53776c1b4b9
         imagePullPolicy: IfNotPresent
         readinessProbe:
           httpGet:
