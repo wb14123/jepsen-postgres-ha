@@ -72,7 +72,7 @@
                         {:db        db
                          :nodes     (:nodes opts)
                          :faults    (:nemesis opts)
-                         :partition {:targets [nil :primaries :one :majority :all]}
+                         :partition {:targets [:primaries :one :majority :all]}
                          :pause     {:targets [nil :one :primaries :majority :all]}
                          ; :kill      {:targets [nil :one :primaries :majority :all]}
                          :kill      {:targets [nil :primaries :majority]}
