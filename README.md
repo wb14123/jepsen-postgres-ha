@@ -77,19 +77,11 @@ lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrenc
 
 ### Test Result
 
-#### Patroni check primary failed
+#### Patroni serializable passed
 
-Patroni should only has at most 1 primary.
+Tried `--nemesis all`, `--nemesis packet,kill`, `--nemesis packet,kill,partition` and combined with `--break-conn-percent 0.3`. All passed the test.
 
-This test runs for 10 mins (`--time-limit 600`). Should be able to find failures faster by tunning `--nemesis-interval` and `--time-limit`.
-
-```
-lein run test --nodes-file ./nodes --username vagrant -w check-primary --concurrency 1 --isolation serializable --nemesis partition,kill  --time-limit 600 -r 1 --max-writes-per-key 16 --nemesis-interval 120 --cluster patroni
-```
-
-#### Patroni serializable failed
-
-Failed with `kill` and `partition` nemesis combained:
+However, it should fail based on [the discussion here](https://github.com/patroni/patroni/issues/3194).
 
 ```
 lein run test --nodes-file ./nodes --username vagrant -w append --concurrency 50 --isolation serializable --nemesis partition,kill  --time-limit 1200 -r 200 --max-writes-per-key 16 --nemesis-interval 120 --cluster patroni
