@@ -98,12 +98,12 @@
 
 (defn kill-k3s-all
   "force kill k3s server and all containers including all subprocesses"
-  []
+  [kill-server?]
   (c/su
     (let [pids (str/split-lines (c/exec "pgrep" "-f" "containerd-shim-runc-v2"))
           all-pids (mapcat get-sub-processes pids)]
-      (c/exec "systemctl" "kill" "--signal=9" "k3s")
-      (c/exec "systemctl" "stop" "k3s")
+      (if kill-server? (c/exec "systemctl" "kill" "--signal=9" "k3s"))
+      (if kill-server? (c/exec "systemctl" "stop" "k3s"))
       (apply c/exec "kill" "-9" all-pids))))
 
 (defn start-k3s
@@ -151,4 +151,4 @@
       (start-k3s))
 
     (kill! [_ test node]
-      (kill-k3s-all))))
+      (kill-k3s-all true))))

@@ -45,13 +45,13 @@
 (def all-nemeses
   "Combinations of nemeses for tests"
   [[]
-   [:pause :kill :partition :clock]])
+   [:pause :kill :partition :clock :packet]])
 
 
 (def special-nemeses
   "A map of special nemesis names to collections of faults"
   {:none []
-   :all  [:pause :kill :partition :clock]})
+   :all  [:pause :kill :partition :clock :packet]})
 
 (defn parse-nemesis-spec
   "Takes a comma-separated nemesis string and returns a collection of keyword
@@ -72,10 +72,15 @@
                         {:db        db
                          :nodes     (:nodes opts)
                          :faults    (:nemesis opts)
-                         :partition {:targets [:primaries :one :majority :all]}
+                         :partition {:targets [:one :primaries]}
                          :pause     {:targets [nil :one :primaries :majority :all]}
+                         :packet {:targets    [:all]  ; A collection of node specs, e.g. [:one, :all]
+                                  :behaviors [  ; A collection of network behaviors that disrupt packets, e.g.:
+                                              {:delay {}}                ; delay packets by 100ms
+                                              ; {:corrupt {:percent :10%}}
+                                              ]} ; corrupt 33% of packets
                          ; :kill      {:targets [nil :one :primaries :majority :all]}
-                         :kill      {:targets [nil :primaries :majority]}
+                         :kill      {:targets [nil :primaries :one]}
                          :interval  (:nemesis-interval opts)})]
     (merge tests/noop-test
            opts
@@ -152,7 +157,7 @@
 
    [nil "--nemesis FAULTS" "A comma-separated list of nemesis faults to enable"
     :parse-fn parse-nemesis-spec
-    :validate [(partial every? #{:pause :kill :partition :clock :member})
+    :validate [(partial every? #{:pause :kill :partition :clock :member :packet})
                "Faults must be pause, kill, partition, clock, or member, or the special faults all or none."]]
 
    [nil "--max-txn-length NUM" "Maximum number of operations in a transaction."
@@ -196,6 +201,12 @@
 
    ["-v" "--version STRING" "What version of Stolon should we test?"
     :default "0.16.0"]
+
+   [nil "--break-conn-percent NUMBER" "The percentage to break client connection early."
+    :parse-fn parse-double
+    :default 0
+    :validate [(fn [v] (and (<= v 1) (>= v 0))) "Must between 0 and 1"]
+    ]
 
    [nil "--cluster NAME" "Which postgres cluster to test."
     :parse-fn str

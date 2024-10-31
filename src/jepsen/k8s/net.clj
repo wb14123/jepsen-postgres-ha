@@ -30,4 +30,4 @@
       (info "Dropping all with grudge:" grudge)
       (p/drop-all! base test grudge))))
 
-(def iptables (iptables-wrap net/iptables))
+(def iptables (iptables-wrap (net/iptables-with-dev :eth1)))

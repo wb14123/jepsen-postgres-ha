@@ -137,6 +137,22 @@ metadata:
     cluster-name: *cluster_name
 subsets: []
 
+# Uncomment to use cluster IP
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: &cluster_name patronidemo
+#   labels:
+#     application: patroni
+#     cluster-name: *cluster_name
+# spec:
+#   type: ClusterIP
+#   ports:
+#   - port: 5432
+#     targetPort: 5432
+
+# Comment the section to use cluster IP
 ---
 apiVersion: v1
 kind: Service
@@ -146,30 +162,11 @@ metadata:
     application: patroni
     cluster-name: *cluster_name
 spec:
-  type: ClusterIP
-  ports:
-  - port: 5432
-    targetPort: 5432
-
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: patronidemo-public
-  labels:
-    application: patroni
-    cluster-name: &cluster_name patronidemo
-spec:
   type: NodePort
   ports:
   - port: 5432
     targetPort: 5432
     nodePort: 30020
-  selector:
-    application: patroni
-    cluster-name: *cluster_name
-    role: primary
 
 ---
 apiVersion: v1

@@ -167,15 +167,25 @@
       (c/set-transaction-isolation! conn (:isolation test)))
 
     (c/with-errors op
-      (let [txn       (:value op)
-            use-txn?  (< 1 (count txn))
-            txn'      (if use-txn?
-                      ;(if true
-                        (j/with-transaction [t conn
-                                             {:isolation (:isolation test)}]
-                          (mapv (partial mop! t test true) txn))
-                        (mapv (partial mop! conn test false) txn))]
-        (assoc op :type :ok, :value txn'))))
+                   (let [break-conn (< (rand) (:break-conn-percent test))  ; make it timeout 30% of the time, use with network slow nemesis
+                         run (fn []
+                               (let [txn       (:value op)
+                                     use-txn?  (< 1 (count txn))
+                                     txn'
+                                     (if use-txn?
+                                       ;(if true
+                                       (j/with-transaction [t conn
+                                                            {:isolation (:isolation test)}]
+                                                           (mapv (partial mop! t test true) txn))
+                                       (mapv (partial mop! conn test false) txn))]
+                                 (assoc op :type :ok, :value txn')))]
+                     (if break-conn
+                       (let [worker (future (run))]
+                         (future (do
+                                   (Thread/sleep 150)
+                                   (c/close! conn)))
+                         @worker)
+                       (run)))))
 
   (teardown! [_ test])
 
