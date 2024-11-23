@@ -52,7 +52,7 @@
   [node]
   (with-retry [tries 100]
     (info "Waiting for" node "to come online...")
-    (let [conn (open node)]
+    (let [conn (open test node)]
       (try (j/execute-one! conn
                            ["create table if not exists jepsen_await ()"])
            conn

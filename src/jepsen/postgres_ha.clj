@@ -68,7 +68,8 @@
         workload      ((workloads workload-name) opts)
         cluster (:cluster opts)
         db (pdb/k8s-db cluster)
-        nemesis       (nemesis/nemesis-package
+        ; nemesis       (nemesis/nemesis-package
+        nemesis       (nemesis/slow-kill-package
                         {:db        db
                          :nodes     (:nodes opts)
                          :faults    (:nemesis opts)
@@ -80,7 +81,7 @@
                                               ; {:corrupt {:percent :10%}}
                                               ]} ; corrupt 33% of packets
                          ; :kill      {:targets [nil :one :primaries :majority :all]}
-                         :kill      {:targets [nil :primaries :one]}
+                         :kill      {:targets [:primaries]}
                          :interval  (:nemesis-interval opts)})]
     (merge tests/noop-test
            opts

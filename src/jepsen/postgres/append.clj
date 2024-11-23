@@ -3,6 +3,7 @@
   (:require [clojure.tools.logging :refer [info warn]]
             [clojure [pprint :refer [pprint]]
                      [string :as str]]
+            [clojure.core.async :as async :refer :all]
             [dom-top.core :refer [with-retry]]
             [elle.core :as elle]
             [jepsen [checker :as checker]
@@ -163,12 +164,11 @@
     ; One-time connection setup
     (when (compare-and-set! initialized? false true)
       (j/execute! conn [(str "set application_name = 'jepsen process "
-                        (:process op) "'")])
+                             (:process op) "'")])
       (c/set-transaction-isolation! conn (:isolation test)))
-
-    (c/with-errors op
-                   (let [break-conn (< (rand) (:break-conn-percent test))  ; make it timeout 30% of the time, use with network slow nemesis
-                         run (fn []
+    (let [break-conn (< (rand) (:break-conn-percent test))  ; make it timeout 30% of the time, use with network slow nemesis
+          run (fn []
+                (c/with-errors op
                                (let [txn       (:value op)
                                      use-txn?  (< 1 (count txn))
                                      txn'
@@ -178,14 +178,22 @@
                                                             {:isolation (:isolation test)}]
                                                            (mapv (partial mop! t test true) txn))
                                        (mapv (partial mop! conn test false) txn))]
-                                 (assoc op :type :ok, :value txn')))]
-                     (if break-conn
-                       (let [worker (future (run))]
-                         (future (do
-                                   (Thread/sleep 150)
-                                   (c/close! conn)))
-                         @worker)
-                       (run)))))
+                                 (assoc op :type :ok, :value txn'))))]
+    (if break-conn
+      (let [result-chan (chan)
+            close-chan (chan)
+            ]
+        (go (>! result-chan (try (run) (catch Throwable e e))))
+        (go (<! (timeout 120))
+            (try (c/close! conn) (catch Throwable e e))
+            (>! close-chan true))
+        (<!! close-chan)
+        (let [result (<!! result-chan)]
+          (if (instance? Throwable result)
+            (throw result)
+            result
+            )))
+      (run))))
 
   (teardown! [_ test])
 

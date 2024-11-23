@@ -77,12 +77,9 @@ lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrenc
 
 ### Test Result
 
-#### Patroni serializable passed
-
-Tried `--nemesis all`, `--nemesis packet,kill`, `--nemesis packet,kill,partition` and combined with `--break-conn-percent 0.3`. All passed the test.
-
-However, it should fail based on [the discussion here](https://github.com/patroni/patroni/issues/3194).
+#### Patroni failed:
 
 ```
-lein run test --nodes-file ./nodes --username vagrant -w append --concurrency 50 --isolation serializable --nemesis partition,kill  --time-limit 1200 -r 200 --max-writes-per-key 16 --nemesis-interval 120 --cluster patroni
+lein run test --nodes-file ./nodes --username vagrant -w append --concurrency 10 --isolation serializable --nemesis packet,kill  --time-limit 300 -r 100  --nemesis-interval 60 --break-conn-percent 0.5 --cluster patroni --key-count 1 --max-txn-length 1 --max-writes-per-key 12000
 ```
+

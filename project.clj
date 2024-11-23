@@ -9,6 +9,7 @@
                  [org.postgresql/postgresql "42.7.2"]
                  [seancorfield/next.jdbc "1.2.659"]
                  [clj-wallhack "1.0.1"]
+                 [org.clojure/core.async "1.6.681"]
                  ]
   :main jepsen.postgres-ha
   :repl-options {:init-ns jepsen.postgres-ha})
