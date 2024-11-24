@@ -80,6 +80,6 @@ lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrenc
 #### Patroni failed:
 
 ```
-lein run test --nodes-file ./nodes --username vagrant -w append --concurrency 10 --isolation serializable --nemesis packet,kill  --time-limit 300 -r 100  --nemesis-interval 60 --break-conn-percent 0.5 --cluster patroni --key-count 1 --max-txn-length 1 --max-writes-per-key 12000
+lein run test --nodes-file ./nodes --username vagrant -w append --concurrency 10 --isolation serializable --nemesis packet,kill --time-limit 1800 -r 100 --nemesis-interval 60 --break-conn-percent 0.8 --cluster patroni --key-count 1 --max-txn-length 1 --max-writes-per-key 24000
 ```
 
