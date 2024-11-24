@@ -112,6 +112,13 @@
     (info "start k3s ... block: " block?)
     (c/su (c/exec "systemctl" "start" block-flag "k3s"))))
 
+(defn delete-patroni-endpoints
+  [node]
+  (run-on-one-node node "kubectl" "delete" "endpoints" "--ignore-not-found=true" "patronidemo-sync")
+  (run-on-one-node node "kubectl" "delete" "endpoints" "--ignore-not-found=true" "patronidemo-config")
+  (run-on-one-node node "kubectl" "delete" "endpoints" "--ignore-not-found=true" "patronidemo-repl")
+  )
+
 (defn k8s-db
   [k8s-dir]
   (reify db/DB
@@ -139,6 +146,7 @@
       (Thread/sleep 5000)
       (run-on-one-node node "kubectl" "wait" "--for=delete" "pods" "--all" "--timeout=600s")
       (Thread/sleep 20000)
+      (delete-patroni-endpoints node) ; sometimes the endpoints are not deleted
       (c/su (c/exec "rm" "-rf" "/psql-data"))
       (Thread/sleep 5000)
       )
