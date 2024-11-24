@@ -34,6 +34,11 @@
    :check-primary check-primary/workload
    :none        (fn [_] tests/noop-test)})
 
+(def nemesis-suites
+  {:all nemesis/nemesis-package
+   :slow-net-kill nemesis/slow-net-kill-package}
+  )
+
 (def all-workloads
   "A collection of workloads we run by default."
   (remove #{:none} (keys workloads)))
@@ -68,8 +73,8 @@
         workload      ((workloads workload-name) opts)
         cluster (:cluster opts)
         db (pdb/k8s-db cluster)
-        ; nemesis       (nemesis/nemesis-package
-        nemesis       (nemesis/slow-kill-package
+        nemesis-pkg-fn (nemesis-suites (:nemesis-suite opts))
+        nemesis       (nemesis-pkg-fn
                         {:db        db
                          :nodes     (:nodes opts)
                          :faults    (:nemesis opts)
@@ -171,7 +176,7 @@
     :parse-fn parse-long
     :validate [pos? "Must be a positive integer."]]
 
-   [nil "--nemesis-interval SECS" "Roughly how long between nemesis operations."
+   [nil "--nemesis-interval SECS" "Roughly how long between nemesis operations. Only effective when nemesis-package is all."
     :default 5
     :parse-fn read-string
     :validate [pos? "Must be a positive number."]]
@@ -220,7 +225,13 @@
     :default :append
     :parse-fn keyword
     :validate [workloads (cli/one-of workloads)]]
-   ])
+
+   [nil "--nemesis-suite NAME" "Nemesis package to use. One of :all or :slow-kill-net"
+    :default :all
+    :parse-fn keyword
+    :validate [nemesis-suites (cli/one-of nemesis-suites)]]
+   ]
+  )
 
 
 (defn opt-fn

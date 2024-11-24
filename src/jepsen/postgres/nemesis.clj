@@ -18,7 +18,7 @@
     (nc/nemesis-package opts)))
 
 
-(defn packet-package
+(defn- slow-packet-all-time
   "A nemesis and generator package that disrupts packets,
    e.g. delay, loss, corruption, etc.
 
@@ -59,7 +59,7 @@
 
 
 
-(defn db-package
+(defn- kill-cycle
   "A nemesis and generator package for acting on a single DB. Options are from
   nemesis-package."
   [opts]
@@ -92,19 +92,17 @@
               :color  "#A0B1E9"}}}))
 
 
-(defn nemesis-packages
+(defn slow-net-kill-package
   "Just like nemesis-package, but returns a collection of packages, rather than
   the combined package, so you can manipulate it further before composition."
   [opts]
-  (let [faults   (set (:faults opts [:partition :packet :kill :pause :clock :file-corruption]))
-        opts     (assoc opts :faults faults)]
-    [
-     (packet-package opts)
-     (db-package opts)]))
-
-(defn slow-kill-package
-  [opts]
-  (nc/compose-packages (nemesis-packages opts))
-  )
+  (let [faults (set (:faults opts [:partition :packet :kill :pause :clock :file-corruption]))
+        opts (assoc opts :faults faults)
+        pkg [
+             (slow-packet-all-time opts)
+             (kill-cycle opts)]
+        ]
+    (nc/compose-packages pkg)
+    ))
 
 
