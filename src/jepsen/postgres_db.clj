@@ -107,8 +107,10 @@
       (apply c/exec "kill" "-9" all-pids))))
 
 (defn start-k3s
-  []
-  (c/su (c/exec "systemctl" "start" "--no-block" "k3s")))
+  [block?]
+  (let [block-flag (if block? nil "--no-block")]
+    (info "start k3s ... block: " block?)
+    (c/su (c/exec "systemctl" "start" block-flag "k3s"))))
 
 (defn k8s-db
   [k8s-dir]
@@ -116,6 +118,7 @@
 
     (setup! [_ test node]
       (info "Setup node" node)
+      (start-k3s true)
       (c/upload (str "./cluster/" k8s-dir "/k8s.yaml") "/home/vagrant/k8s.yaml")
       (c/su (c/exec "mkdir" "-p" "/psql-data"))
       (run-on-one-node node "kubectl" "create" "-f" "/home/vagrant/k8s.yaml")
@@ -125,6 +128,7 @@
 
     (teardown! [_ test node]
       (info "Teardown node" node)
+      (start-k3s true)
       (c/upload (str "./cluster/" k8s-dir "/k8s.yaml") "/home/vagrant/k8s.yaml")
       ; do not wait since pv will not be deleted before pvc
       (run-on-one-node node "kubectl" "delete" "--ignore-not-found=true" "--wait=false" "-f" "/home/vagrant/k8s.yaml")
@@ -134,8 +138,10 @@
       (run-on-one-node node "kubectl" "delete" "--ignore-not-found=true" "-f" "/home/vagrant/k8s.yaml")
       (Thread/sleep 5000)
       (run-on-one-node node "kubectl" "wait" "--for=delete" "pods" "--all" "--timeout=600s")
+      (Thread/sleep 20000)
+      (c/su (c/exec "rm" "-rf" "/psql-data"))
       (Thread/sleep 5000)
-      (c/su (c/exec "rm" "-rf" "/psql-data")))
+      )
 
     db/Primary
     (setup-primary! [db test node])
@@ -148,7 +154,7 @@
     db/Kill
 
     (start! [_ test node]
-      (start-k3s))
+      (start-k3s false))
 
     (kill! [_ test node]
       (kill-k3s-all true))))
