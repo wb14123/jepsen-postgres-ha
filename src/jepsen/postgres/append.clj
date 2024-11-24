@@ -166,11 +166,14 @@
       (j/execute! conn [(str "set application_name = 'jepsen process "
                              (:process op) "'")])
       (c/set-transaction-isolation! conn (:isolation test)))
-    (let [break-conn (< (rand) (:break-conn-percent test))  ; make it timeout 30% of the time, use with network slow nemesis
+    (let [
+          txn       (:value op)
+          use-txn?  (< 1 (count txn))
+          read-only? (every? #(= :r (first %)) txn)
+          break-conn (< (rand) (:break-conn-percent test))  ; make it timeout 30% of the time, use with network slow nemesis
           run (fn []
                 (c/with-errors op
-                               (let [txn       (:value op)
-                                     use-txn?  (< 1 (count txn))
+                               (let [
                                      txn'
                                      (if use-txn?
                                        ;(if true
@@ -179,7 +182,7 @@
                                                            (mapv (partial mop! t test true) txn))
                                        (mapv (partial mop! conn test false) txn))]
                                  (assoc op :type :ok, :value txn'))))]
-    (if break-conn
+    (if (and break-conn (not read-only?))
       (let [result-chan (chan)
             close-chan (chan)
             ]
