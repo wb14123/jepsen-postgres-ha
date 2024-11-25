@@ -162,7 +162,7 @@
     db/Kill
 
     (start! [_ test node]
-      (start-k3s false))
+      (start-k3s true))
 
     (kill! [_ test node]
       (kill-k3s-all true))))
