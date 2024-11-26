@@ -79,7 +79,12 @@ lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrenc
 
 #### Patroni failed:
 
-```
-lein run test --nodes-file ./nodes --username vagrant -w append --concurrency 10 --isolation serializable --nemesis packet,kill --time-limit 1800 -r 100 --nemesis-interval 60 --break-conn-percent 0.8 --cluster patroni --key-count 1 --max-txn-length 1 --max-writes-per-key 24000 --nemesis-suite slow-net-kill
+It doesn't reproduce everytime. Use this command try multiple times:
+
+```bash
+for i in `seq 1 10` ; do
+  lein run test --nodes-file ./nodes --username vagrant -w append --concurrency 10 --isolation serializable --nemesis packet,kill --time-limit 1800 -r 100 --nemesis-interval 60 --break-conn-percent 0.8 --cluster patroni --key-count 1 --max-txn-length 1 --max-writes-per-key 24000 --nemesis-suite slow-net-kill
+  sleep 30
+done
 ```
 
