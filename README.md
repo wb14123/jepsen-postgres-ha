@@ -79,7 +79,7 @@ lein run test-all --nodes-file ./nodes --username vagrant -w append --concurrenc
 
 #### Patroni failed:
 
-It doesn't reproduce everytime. Use this command try multiple times:
+It doesn't reproduce every time. Use this command try multiple times. It will try 10 times of the test, 30 minutes each:
 
 ```bash
 for i in `seq 1 10` ; do
@@ -88,3 +88,9 @@ for i in `seq 1 10` ; do
 done
 ```
 
+Use `lein run serve` to start a web server to view the test results. Usually there will be 1 failed test.
+
+Patroni has 2 problems now:
+
+1. Can be seen from failed test, it doesn't guarantee read committed.
+2. Failed to recover with 2/3 available nodes after multiple failures.
