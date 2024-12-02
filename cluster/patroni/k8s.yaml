@@ -53,7 +53,7 @@ spec:
           mountPath: "/home/postgres"
       containers:
       - name: *cluster_name
-        image: wb14123/patroni:v4.0.3-test-5 # build from https://github.com/wb14123/patroni/commit/c1ed14761a6ce556c05f1c19e8e5a6256bb351ef
+        image: wb14123/patroni:v4.0.3-test-6 # build from https://github.com/wb14123/patroni/commit/9ecfbe6209af3b3fd686d77bb9beb04deabaf5a9
         imagePullPolicy: IfNotPresent
         readinessProbe:
           httpGet:
@@ -110,6 +110,8 @@ spec:
           value: '0.0.0.0:5432'
         - name: PATRONI_RESTAPI_LISTEN
           value: '0.0.0.0:8008'
+        - name: PATRONI_SYNC_MODE
+          value: "on"
       terminationGracePeriodSeconds: 0
       volumes:
       - name: pgdata
