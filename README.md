@@ -46,6 +46,12 @@ Then start Vagrant VMs:
 vagrant up
 ```
 
+Reboot VMs to refresh kernel and newly installed kernel modules (drbd):
+
+```
+vagrant halt && vagrant up
+```
+
 ### Shudown/Destroy VMs
 
 Use this command to shutdown VMs:
