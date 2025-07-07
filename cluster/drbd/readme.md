@@ -56,3 +56,8 @@ Then enable quorum in `drbd.conf` by replacing `quorum no` to `quorum majority`.
 drbdadm adjust db
 ```
 
+Auto start on boot:
+
+```
+systemctl enable drbd@db.target
+```
