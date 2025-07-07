@@ -60,6 +60,7 @@ Vagrant.configure("2") do |config|
     v.vm.box = distro
     v.vm.hostname = "postgres-server-3"
     v.vm.network "private_network", ip: "192.168.56.4"
+    add_disk v, '/data/vagrant/disks/postgres-ha-3.vdi'
     v.vm.provision "file", source: "./drbd/install-drbd.sh", destination: "$HOME/install-drbd.sh"
     v.vm.provision "shell", inline: "sudo /home/vagrant/install-drbd.sh"
     v.vm.provision "file", source: "./k3s-config/server3.yaml", destination: "$HOME/k3s-config.yaml"
